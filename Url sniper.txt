@@ -1,0 +1,50 @@
+import discord
+import requests
+import time
+import colorama
+from colorama import Fore, Back, Style
+
+
+
+
+colorama.init()
+
+# Botunuzun Discord API Token'ı
+token = ""
+
+# İşlem yapmak istediğiniz sunucunun ID'si
+guild_id = 
+
+# Oluşturmak istediğiniz vanity URL
+vanity_url = "malower"
+
+headers = {
+    "Authorization": token,
+    "Content-Type": "application/json"
+}
+
+payload = {
+    "code": vanity_url
+}
+
+def send_request(url, headers, payload):
+    response = requests.patch(url, headers=headers, json=payload)
+    if response.status_code == 429:
+        reset_time = int(response.headers['X-RateLimit-Reset-After'])
+        print(f"Rate limit algılandı,   {reset_time} saniye mecbur beklicez.")
+        time.sleep(reset_time)
+        return send_request(url, headers, payload)
+    else:
+        return response
+
+while True:
+    response = send_request(f"https://discord.com/api/v9/guilds/{guild_id}/vanity-url", headers, payload)
+    print(response.status_code)
+    if response.status_code == 200:
+        print(Fore.GREEN)
+        print("[+] " + vanity_url+" url alındı")
+        break
+    else:
+        print(Fore.RED)
+        print("[-] " + vanity_url+ " yeniden dneiycek")
+        time.sleep(0.3)
